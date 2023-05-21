@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoVTT - Automatic Low Cost Transcription Service</title>
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2.2/dist/tailwind.min.css" />
+    <style>
+        .logo {
+            font-size: 2em;
+        }
+        /* new styles for file input */
+        .file-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        /* Add styles for progress bar */
+        progress {
+            width: 100%;
+            height: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <nav class="bg-white p-6 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="logo font-semibold text-xl text-gray-800">AutoVTT</h1>
+            <div class="space-x-4">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Log In</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-blue-500 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">Efficient. Affordable. Accurate.</h2>
+            <p class="text-xl sm:text-2xl lg:text-3xl mb-6">Discover AutoVTT, your one-stop solution for all your transcription needs.</p>
+            <button class="bg-white text-blue-500 px-6 py-2 text-lg font-semibold rounded hover:bg-gray-100">Get Started</button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4">Upload your files</h2>
+            <!-- Changed this part -->
+            <div class="file-upload cta-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <span>Upload Audio</span>
+                <input type="file" id="fileInput" class="mb-4" accept=".wav,.mp3" multiple>
+            </div>
+            <!-- Add progress bars -->
+            <div id="progressBars"></div>
+        </section>
+
+        <section id="downloads" class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4">Download your transcriptions</h2>
+            <div id="downloadLinks"></div>
+            <button id="downloadAllButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" disabled>Download All</button>
+        </section>
+
+        <section id="pricing" class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4">Transparent Pricing</h2>
+            <p class="mb-6">Choose the plan that suits you best:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Pricing cards here -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white py-6 mt-12 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="mb-2">&copy; 2023 AutoVTT. All rights reserved.</p>
+            <div class="space-x-4">
+                <a href="#privacy-policy" class="text-blue-500 hover:underline">Privacy Policy</a>
+                <a href="#terms-of-service" class="text-blue-500 hover:underline">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const uploadButton = document.querySelector('.cta-button');
+        const fileInput = document.getElementById('fileInput');
+
+        fileInput.addEventListener('change', function(e) {
+            for (let i = 0; i < e.target.files.length; i++) {
+                uploadFile(e.target.files[i], i);
+            }
+        });
+
+        document.getElementById('downloadAllButton').addEventListener('click', function() {
+            const downloadLinks = document.getElementById('downloadLinks').children;
+            for (let i = 0; i < downloadLinks.length; i++) {
+                downloadLinks[i].click();
+            }
+        });
+                
+        
+        function uploadFile(file, index) {
+            const formData = new FormData();
+            formData.append('file', file);
+        
+            // Create filename label
+            const filenameLabel = document.createElement('p');
+            filenameLabel.innerText = `Transcribing ${file.name}...`;
+            document.getElementById('progressBars').appendChild(filenameLabel);
+        
+            const progressBar = document.createElement('progress');
+            progressBar.setAttribute('max', 300); // assuming 5 minutes for 1 hour audio
+            progressBar.setAttribute('value', 0);
+            document.getElementById('progressBars').appendChild(progressBar);
+        
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:5000/api/transcribe', true);
+        
+            // Update progress
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    progressBar.value = (e.loaded / e.total) * 300;
+                }
+            };
+
+            xhr.onload = function() {
+                console.log('Response:', this.responseText);
+                if (this.status == 200) {
+                    // Add a download link
+                    const element = document.createElement('a');
+                    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.responseText));
+                    element.setAttribute('download', 'transcript-' + index + '.txt');
+                    element.innerText = `Download transcript-${index}.txt`;
+        
+                    document.getElementById('downloadLinks').appendChild(element);
+        
+                    // Enable the "Download All" button
+                    document.getElementById('downloadAllButton').disabled = false;
+                } else if (this.status == 202) {
+                    // Handle accepted but not completed response
+                    // For example, you might start a timer to periodically check the status of the task
+                    checkTaskStatus();
+                } else {
+                    alert('An error occurred: ' + this.status);
+                }
+            };
+        
+            xhr.send(formData);
+        }
+
+        function checkTaskStatus(taskId, index) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `http://localhost:5000/api/transcribe/status/${taskId}`, true);
+        
+            xhr.onload = function() {
+                console.log('Response:', this.responseText);
+                if (this.status == 200) {
+                    const taskInfo = JSON.parse(this.responseText);
+        
+                    document.getElementById(`progress-${taskId}`).value = taskInfo.current;
+        
+                    if (taskInfo.state != 'SUCCESS') {
+                        // Check again after 5 seconds
+                        setTimeout(() => checkTaskStatus(taskId, index), 5000);
+                    } else {
+                        // Add a download link
+                        const element = document.createElement('a');
+                        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(taskInfo.result));
+                        element.setAttribute('download', `transcript-${index}.txt`);
+                        element.innerText = `Download transcript-${index}.txt`;
+        
+                        document.getElementById('downloadLinks').appendChild(element);
+        
+                        // Enable the "Download All" button
+                        document.getElementById('downloadAllButton').disabled = false;
+                    }
+                } else {
+                    alert('An error occurred: ' + this.status);
+                }
+            };
+        
+            xhr.send();
+        }
+        
+    </script>
+</body>
+
+</html>

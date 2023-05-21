@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>User Management</title>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>User Management</title>
+            <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet" />
+            <script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-auth.js"></script>
+            <style>
+                body {
+                    font-family: 'Poppins', sans-serif;
+                    background: linear-gradient(to right, #d3d3d3, #d3d3d3);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                }
+                
+                .card {
+                    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                    max-width: 300px;
+                    margin: auto;
+                    text-align: center;
+                    padding: 10px;
+                }
+                
+                .title {
+                    color: grey;
+                    font-size: 18px;
+                }
+                
+                button {
+                    border: none;
+                    outline: 0;
+                    display: inline-block;
+                    padding: 8px;
+                    color: white;
+                    background-color: #000;
+                    text-align: center;
+                    cursor: pointer;
+                    width: 100%;
+                    font-size: 18px;
+                    margin-top: 10px;
+                }
+    
+                button:hover {
+                    opacity: 0.7;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h1>User Management</h1>
+                <div class="title">
+                    <input type="email" id="email" class="form-control" placeholder="Email" />
+                    <input type="password" id="password" class="form-control" placeholder="Password" style="margin-top: 10px;"/>
+                    <button id="signup"><i class="fas fa-user-plus"></i> Sign Up</button>
+                    <button id="signin"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+                    <button id="signout"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                </div>
+            </div>
+        </body>
+    <script>
+        // Initialize Firebase
+        var firebaseConfig = {
+        apiKey: "AIzaSyCMPceUxkD3KuDYEurQ__qfccYMcOxpX9c",
+        authDomain: "transcription-bc195.firebaseapp.com",
+        projectId: "transcription-bc195",
+        storageBucket: "transcription-bc195.appspot.com",
+        messagingSenderId: "395714298754",
+        appId: "1:395714298754:web:4616183faf6d76e9b8859b",
+        measurementId: "G-J3PG8P4K79"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Get references to HTML elements
+        var emailInput = document.getElementById("email");
+        var passwordInput = document.getElementById("password");
+        var signupButton = document.getElementById("signup");
+        var signinButton = document.getElementById("signin");
+        var signoutButton = document.getElementById("signout");
+
+        // Sign up a new user
+        signupButton.addEventListener("click", function () {
+        var email = emailInput.value;
+        var password = passwordInput.value;
+        firebase
+            .auth()
+            .createUserWithEmailAndPassword(email, password)
+            .then(function (userCredential) {
+            console.log("Sign up successful!");
+            emailInput.value = "";
+            passwordInput.value = "";
+            })
+            .catch(function (error) {
+            console.log("Sign up error: " + error.message);
+            });
+        });
+
+        // Sign in an existing user
+        signinButton.addEventListener("click", function () {
+        var email = emailInput.value;
+        var password = passwordInput.value;
+        firebase
+            .auth()
+            .signInWithEmailAndPassword(email, password)
+            .then(function (userCredential) {
+            console.log("Sign in successful!");
+            emailInput.value = "";
+            passwordInput.value = "";
+            })
+            .catch(function (error) {
+            console.log("Sign in error: " + error.message);
+            });
+        });
+
+        // Sign out the current user
+        signoutButton.addEventListener("click", function () {
+        firebase
+            .auth()
+            .signOut()
+            .then(function () {
+            console.log("Sign out successful!");
+            })
+            .catch(function (error) {
+            console.log("Sign out error: " + error.message);
+            });
+        });
+    </script>
+    </head>
+
+</html>

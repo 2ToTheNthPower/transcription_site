@@ -1,0 +1,12 @@
+.env
+dump.rdb
+
+# exclude everything
+audio/*
+redis-server/*
+transcripts/*
+
+# exception to the rule
+!audio/.gitkeep 
+!redis-server/.gitkeep 
+!transcripts/.gitkeep 
