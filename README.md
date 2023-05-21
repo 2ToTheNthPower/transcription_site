@@ -1,0 +1,1 @@
+To get this working, you need celery and reddis running, plus a server the homepage and the backend.
